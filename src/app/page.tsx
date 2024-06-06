@@ -1,83 +1,84 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
+import Transaction from "@/app/types/transaction";
+import AddTransaction from "@/app/home/add-transaction";
+import TransactionHistory from "@/app/home/history";
 
 export default function Home() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const calculateBalance = () => {
+    return transactions
+      .reduce((acc, transaction) => acc + transaction.amount, 0)
+      .toFixed(2);
+  };
+
+  const calculateIncome = () => {
+    return transactions
+      .filter((transaction) => transaction.amount > 0)
+      .reduce((acc, transaction) => acc + transaction.amount, 0)
+      .toFixed(2);
+  };
+
+  const calculateExpense = () => {
+    return transactions
+      .filter((transaction) => transaction.amount < 0)
+      .reduce((acc, transaction) => acc + transaction.amount, 0);
+  };
+
   return (
-    <>
-      <header className="flex items-center justify-between mx-10 py-2 mb-6">
+    <div>
+      <header className="flex items-center justify-between mx-12 py-2 m-4 dark:text-white">
         <h1 className="font-bold text-xl">Expense Tracker</h1>
       </header>
-      <main className="flex min-h-screen flex-col mx-10">
-        <section className="mb-6">
-          <div className="font-bold">
-            <h3>Your Balance</h3>
-            <h1 className="text-3xl">$0.00</h1>
-          </div>
-        </section>
+      <main className="flex flex-col mx-10 bg-gray-50 dark:bg-neutral-700 p-4 shadow-xl rounded-lg mb-6 border border-gray-300 dark:border-transparent">
+        <div className="grid md:grid-cols-2 gap-4 w-full">
+          <div>
+            <div className="flex justify-center flex-wrap">
+              <section className="mb-6 w-full md:w-auto mr-2 dark:text-white">
+                <div className="font-bold p-6 text-center bg-white dark:bg-neutral-800 shadow-md rounded-md">
+                  <h3>Your Balance</h3>{" "}
+                  <h1 className="text-3xl">${calculateBalance()}</h1>
+                </div>
+              </section>
 
-        <section className="flex justify-around w-full bg-white shadow-md mb-6">
-          <div className="p-6 text-center">
-            <h3>Income</h3>
-            <p className="text-green-500 font-bold">$0.00</p>
-          </div>
-          <div className="border-l-2 border-gray-300 my-2"></div>
-          <div className="p-6 text-center">
-            <h3>Expense</h3>
-            <p className="text-red-700 font-bold">$0.00</p>
-          </div>
-        </section>
-
-        <section className="w-full mb-6">
-          <h3 className="font-bold border-b-2 border-gray-300 mb-3 py-2">
-            History
-          </h3>
-
-          <ul>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <li
-                className="flex justify-between bg-white p-2 shadow-md mb-2 border-r-4 border-red-700"
-                key={index}
-              >
-                <h4>Income</h4>
-                <p>+$0.00</p>
-              </li>
-            ))}
-            <li className="flex justify-between bg-white p-2 shadow-md mb-2 border-r-4 border-green-500">
-              <h4>Income</h4>
-              <p>+$0.00</p>
-            </li>
-          </ul>
-        </section>
-
-        <section className="w-full mb-6">
-          <h3 className="font-bold border-b-2 border-gray-300 mb-3 py-2">
-            Add new transaction
-          </h3>
-          <form>
-            <div className="mb-3">
-              <label className="block py-2">Text</label>
-              <input
-                type="text"
-                className="w-full p-2 border border-gray-300 bg-white  shadow-sm"
-                placeholder="Enter text..."
-              />
+              <section className="flex justify-around md:w-auto w-full bg-white dark:bg-neutral-800 shadow-md mb-6 rounded-md">
+                <div className="p-6 text-center">
+                  <h3>Income</h3>
+                  <p className="text-green-500 font-bold">
+                    ${calculateIncome()}
+                  </p>
+                </div>
+                <div className="border-l-2 border-gray-300 my-2"></div>
+                <div className="p-6 text-center">
+                  <h3>Expense</h3>
+                  <p className="text-red-700 font-bold">
+                    ${Math.abs(calculateExpense()).toFixed(2)}
+                  </p>
+                </div>
+              </section>
             </div>
-            <div className="mb-3">
-              <label className="block">Amount</label>
-              <p className="text-xs text-gray-500 mb-2">
-                (negative - expense, positive - income)
-              </p>
-              <input
-                type="number"
-                className="w-full p-2 border border-gray-300 bg-white shadow-sm"
-                placeholder="Enter amount..."
+
+            <section className="w-full mb-6 md:hidden block">
+              <TransactionHistory transactions={transactions} />
+            </section>
+
+            <section className="w-full">
+              <AddTransaction
+                calculateBalance={calculateBalance}
+                setTransactions={setTransactions}
+                transactions={transactions}
               />
-            </div>
-            <button className="w-full bg-blue-500 text-white p-2">
-              Add transaction
-            </button>
-          </form>
-        </section>
+            </section>
+          </div>
+          <div className="hidden md:block mx-4">
+            <TransactionHistory
+              transactions={transactions}
+              setTransactions={setTransactions}
+            />
+          </div>
+        </div>
       </main>
-    </>
+    </div>
   );
 }
